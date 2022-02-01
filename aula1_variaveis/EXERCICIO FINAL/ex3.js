@@ -6,8 +6,10 @@ let mult = c * b
 
 let divis = mult / a;
 
-console.log(divis);
+let desconto = 100 - divis;
 
-// Cupom de desconto de 61,5%
+console.log(desconto);
+
+// Cupom de desconto de 38,5%
 
 
