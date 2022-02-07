@@ -12,7 +12,8 @@ console.log(paises)       // ADICIONA PAIS NO COMEÇO
 paises.shift()
 console.log(paises)        // REMOVE PAIS DO COMEÇO
 
-console.log(paises[4])     // IMPRIME O ULTIMO
+const ultimo = paises[paises.length - 1]
+console.log(ultimo)     // IMPRIME O ULTIMO
 
 console.log(paises[1])     // IMPRIME O SEGUNDO
 
