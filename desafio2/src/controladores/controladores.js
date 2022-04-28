@@ -127,11 +127,110 @@ const depositar = (req, res) => {
                 valor
             })
 
-            return res.status(200).json(dados);
+            return res.status(200).json();
         }
 
+    } catch (erro) {
+        res.status(400).json({ mensagem: erro.message });
+    }
+}
 
+const sacar = (req, res) => {
+    try {
+        const { numero_conta, valor, senha } = req.body;
+        const conta = dados.contas.find(conta => conta.id == numero_conta);
 
+        if (!numero_conta || !valor) {
+            return res.status(400).json({ mensagem: 'Dados incompletos, insira o numero da conta e o valor' })
+        }
+
+        if (!conta) {
+            return res.status(400).json({ mensagem: 'Conta não encontrada, verifique os dados e tente novamente' })
+        }
+
+        if (!senha) {
+            return res.status(401).json({ mensagem: 'A senha não foi informada' })
+        }
+        if (senha !== conta.senha) {
+            return res.status(401).json({ mensagem: 'A senha esta incorreta' })
+        }
+
+        if (valor > conta.saldo) {
+            return res.status(400).json({ mensagem: 'Saldo insuficiente' })
+        } else {
+            conta.saldo -= valor;
+
+            dados.saques.push({
+                data: format(new Date(), 'yyyy-MM-dd HH:mm:ss'),
+                numero_conta,
+                valor
+            })
+
+            return res.status(200).json();
+        }
+
+    } catch (erro) {
+        res.status(400).json({ mensagem: erro.message });
+    }
+}
+
+const transferir = (req, res) => {
+    try {
+        const { numero_conta_origem, numero_conta_destino, valor, senha } = req.body;
+        const contaOrigem = dados.contas.find(conta => conta.id == numero_conta_origem);
+        const contaDestino = dados.contas.find(conta => conta.id == numero_conta_destino);
+
+        if (!contaOrigem || !contaDestino) {
+            return res.status(400).json({ mensagem: 'Conta não encontrada, verifique os dados e tente novamente' })
+        }
+
+        if (!senha) {
+            return res.status(401).json({ mensagem: 'A senha não foi informada' })
+        }
+        if (senha !== contaOrigem.senha) {
+            return res.status(401).json({ mensagem: 'A senha esta incorreta' })
+        }
+
+        if (valor > contaOrigem.saldo) {
+            return res.status(400).json({ mensagem: 'Saldo insuficiente' })
+        } else {
+            contaOrigem.saldo -= valor;
+            contaDestino.saldo += valor;
+
+            dados.transferencias.push({
+                data: format(new Date(), 'yyyy-MM-dd HH:mm:ss'),
+                numero_conta_origem,
+                numero_conta_destino,
+                valor
+            })
+        }
+
+        return res.status(200).json();
+
+    } catch (erro) {
+        res.status(400).json({ mensagem: erro.message });
+    }
+}
+
+const saldo = (req, res) => {
+    try {
+        const { numero_conta, senha } = req.query;
+        const conta = dados.contas.find(conta => conta.id == numero_conta);
+
+        if (!numero_conta || !senha) {
+            return res.status(400).json({ mensagem: 'Dados incompletos, insira o numero da conta e a senha' })
+        }
+
+        if (!conta) {
+            return res.status(400).json({ mensagem: 'Conta não encontrada, verifique os dados e tente novamente' })
+        }
+
+        if (senha !== conta.senha) {
+            return res.status(401).json({ mensagem: 'A senha esta incorreta' })
+        } else {
+
+            return res.status(200).json({ saldo: conta.saldo });
+        }
 
 
     } catch (erro) {
@@ -139,10 +238,47 @@ const depositar = (req, res) => {
     }
 }
 
+const extrato = (req, res) => {
+    try {
+        const { numero_conta, senha } = req.query;
+        const conta = dados.contas.find(conta => conta.id == numero_conta);
+
+        const deposito = dados.depositos.filter(deposito => deposito.numero_conta == numero_conta);
+        const saques = dados.saques.filter(saque => saque.numero_conta == numero_conta);
+        const transfEnviadas = dados.transferencias.filter(transf => transf.numero_conta_origem == numero_conta);
+        const transfRecebidas = dados.transferencias.filter(transf => transf.numero_conta_destino == numero_conta);
+
+
+        if (!numero_conta || !senha) {
+            return res.status(400).json({ mensagem: 'Dados incompletos, insira o numero da conta e a senha' })
+        }
+
+        if (!conta) {
+            return res.status(400).json({ mensagem: 'Conta não encontrada, verifique os dados e tente novamente' })
+        }
+
+        if (senha !== conta.senha) {
+            return res.status(401).json({ mensagem: 'A senha esta incorreta' })
+        } else {
+
+            return res.status(200).json({ depositos: deposito, saques: saques, transferenciasEnviadas: transfEnviadas, transferenciasRecebidas: transfRecebidas });
+        }
+
+    } catch (erro) {
+        res.status(400).json({ mensagem: erro.message });
+    }
+}
+
+
+
 module.exports = {
     listarContas,
     criarConta,
     atualizarConta,
     deletarConta,
-    depositar
+    depositar,
+    sacar,
+    transferir,
+    saldo,
+    extrato,
 };
