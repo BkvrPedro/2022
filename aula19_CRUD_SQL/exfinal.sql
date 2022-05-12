@@ -46,4 +46,8 @@ UPDATE usuarios SET data_nascimento = '1988-11-02' WHERE email = 'nec.metus.faci
 
 DELETE FROM usuarios WHERE data_nascimento IS NULL;
 
--- CONTINUAR NO ITEM 12
+ALTER TABLE usuarios ALTER COLUMN data_nascimento SET NOT NULL;
+
+INSERT INTO usuarios (nome, data_nascimento, email, senha) VALUES
+('Tate I. Dean', '1989-05-01', 'Nunc@etmagnis.edu', 'd3V25D6Y'),
+('Arsenio K. Harmon', '1985-10-23', 'adipiscing.elit@turpis.com', 'm3T58S0C');
