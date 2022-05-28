@@ -68,11 +68,9 @@ const login = async (req, res) => {
             id: usuario.id,
             nome: usuario.nome,
             email: usuario.email
-        }, jwtSecret, {
-            expiresIn: '1h'
-        });
+        }, jwtSecret);
 
-        return res.send(token);
+        return res.send({ token });
     } catch (error) {
         return res.status(400).json(error.message);
     }
